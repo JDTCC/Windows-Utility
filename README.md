@@ -9,7 +9,7 @@ Download the .zip file on the main page of the GitHub and extract the .zip file 
 Once extracted, open PowerShell (or PowerShell ISE) as an Administrator
 Enable PowerShell execution Set-ExecutionPolicy Unrestricted -Force
 On the prompt, change to the directory where you extracted the files:   e.g. - cd c:\temp
-Next, to run either script, enter in the following:   ```iwr -useb https://raw.githubusercontent.com/JTCJTCC/Windows-Utility-XL/main/windows.ps1 | iex```
+Next, to run either script, enter in the following:   ```iwr -useb https://raw.githubusercontent.com/JTCJTCC/Windows-Utility-/main/windows.ps1 | iex```
 
 Second Method:
 Download the .zip file on the main page of the GitHub and extract the .zip file to your desired location

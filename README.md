@@ -1,6 +1,6 @@
 # Windows Utility XL
 
-Script/Utility/Application to debloat Windows 10, to upgrade or install Windows applications and to configure 
+Script/Utility/Application to debloat Windows 10, to upgrade or install Windows applications and to configure a subset of Windows controls.
 
 ## How to install and use the Windows Utility XL?
 

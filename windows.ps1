@@ -787,7 +787,7 @@ $WPFtweaksbutton.Add_Click({
             $ram = (Get-CimInstance -ClassName Win32_PhysicalMemory | Measure-Object -Property Capacity -Sum).Sum / 1kb
             Set-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control" -Name "SvcHostSplitThresholdInKB" -Type DWord -Value $ram -Force
 
-            Write-Host "Disable News and Interests"
+            Write-Host "Uitschakelen nieuw en interesses"
             If (!(Test-Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Windows Feeds")) {
                 New-Item -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Windows Feeds" | Out-Null
             }
@@ -800,20 +800,20 @@ $WPFtweaksbutton.Add_Click({
 
             Set-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Policies\Explorer" -Name "HideSCAMeetNow" -Type DWord -Value 1
 
-            Write-Host "Removing AutoLogger file and restricting directory..."
+            Write-Host "Weghalen van autologger bestand en beperken van bestandsmap"
             $autoLoggerDir = "$env:PROGRAMDATA\Microsoft\Diagnosis\ETLLogs\AutoLogger"
             If (Test-Path "$autoLoggerDir\AutoLogger-Diagtrack-Listener.etl") {
                 Remove-Item "$autoLoggerDir\AutoLogger-Diagtrack-Listener.etl"
             }
             icacls $autoLoggerDir /deny SYSTEM:`(OI`)`(CI`)F | Out-Null
 
-            Write-Host "Stopping and disabling Diagnostics Tracking Service..."
+            Write-Host "Uitzetten en uitschakelen van diagnostische tracking service"
             Stop-Service "DiagTrack"
             Set-Service "DiagTrack" -StartupType Disabled
             $WPFEssTweaksTele.IsChecked = $false
         }
         If ( $WPFEssTweaksWifi.IsChecked -eq $true ) {
-            Write-Host "Disabling Wi-Fi Sense..."
+            Write-Host "Uitschakelen Wi-Fi sense..."
             If (!(Test-Path "HKLM:\SOFTWARE\Microsoft\PolicyManager\default\WiFi\AllowWiFiHotSpotReporting")) {
                 New-Item -Path "HKLM:\SOFTWARE\Microsoft\PolicyManager\default\WiFi\AllowWiFiHotSpotReporting" -Force | Out-Null
             }
@@ -832,7 +832,7 @@ $WPFtweaksbutton.Add_Click({
             $WPFMiscTweaksLapPower.IsChecked = $false
         }
         If ( $WPFMiscTweaksLapNum.IsChecked -eq $true ) {
-            Write-Host "Disabling NumLock after startup..."
+            Write-Host "Uitschakelen NumLock na het opstarten..."
             If (!(Test-Path "HKU:")) {
                 New-PSDrive -Name HKU -PSProvider Registry -Root HKEY_USERS | Out-Null
             }
@@ -847,7 +847,7 @@ $WPFtweaksbutton.Add_Click({
             $WPFMiscTweaksPower.IsChecked = $false 
         }
         If ( $WPFMiscTweaksNum.IsChecked -eq $true ) {
-            Write-Host "Enabling NumLock after startup..."
+            Write-Host "Inschakelen NumLock na het opstarten..."
             If (!(Test-Path "HKU:")) {
                 New-PSDrive -Name HKU -PSProvider Registry -Root HKEY_USERS | Out-Null
             }
@@ -855,18 +855,18 @@ $WPFtweaksbutton.Add_Click({
             $WPFMiscTweaksNum.IsChecked = $false
         }
         If ( $WPFMiscTweaksExt.IsChecked -eq $true ) {
-            Write-Host "Showing known file extensions..."
+            Write-Host "Vanaf nu zijn de bestandsextensies zichtbaar..."
             Set-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" -Name "HideFileExt" -Type DWord -Value 0
             $WPFMiscTweaksExt.IsChecked = $false
         }
         If ( $WPFMiscTweaksUTC.IsChecked -eq $true ) {
-            Write-Host "Setting BIOS time to UTC..."
+            Write-Host "Instellen BIOS tijd naar UTC..."
             Set-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\TimeZoneInformation" -Name "RealTimeIsUniversal" -Type DWord -Value 1
             $WPFMiscTweaksUTC.IsChecked
         }
 
         If ( $WPFMiscTweaksDisplay.IsChecked -eq $true ) {
-            Write-Host "Adjusting visual effects for performance..."
+            Write-Host "Veranderen van de visuele effecten voor optimale snelheid"
             Set-ItemProperty -Path "HKCU:\Control Panel\Desktop" -Name "DragFullWindows" -Type String -Value 0
             Set-ItemProperty -Path "HKCU:\Control Panel\Desktop" -Name "MenuShowDelay" -Type String -Value 200
             Set-ItemProperty -Path "HKCU:\Control Panel\Desktop" -Name "UserPreferencesMask" -Type Binary -Value ([byte[]](144, 18, 3, 128, 16, 0, 0, 0))
@@ -877,7 +877,7 @@ $WPFtweaksbutton.Add_Click({
             Set-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" -Name "TaskbarAnimations" -Type DWord -Value 0
             Set-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\VisualEffects" -Name "VisualFXSetting" -Type DWord -Value 3
             Set-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\DWM" -Name "EnableAeroPeek" -Type DWord -Value 0
-            Write-Host "Adjusted visual effects for performance"
+            Write-Host "Verderingen compleet"
             $WPFMiscTweaksDisplay.IsChecked = false
         }
 
@@ -969,35 +969,35 @@ $WPFtweaksbutton.Add_Click({
                 #"*Microsoft.WindowsStore*"
             )
 
-            Write-Host "Removing Bloatware"
+            Write-Host "Verwijderen bloatware"
 
             foreach ($Bloat in $Bloatware) {
                 Get-AppxPackage -Name $Bloat | Remove-AppxPackage
                 Get-AppxProvisionedPackage -Online | Where-Object DisplayName -like $Bloat | Remove-AppxProvisionedPackage -Online
-                Write-Host "Trying to remove $Bloat."
+                Write-Host "Proberen te verwijderen $Bloat."
             }
 
-            Write-Host "Finished Removing Bloatware Apps"
+            Write-Host "Afmaken verwijderen bloatware applicaties"
             $WPFEssTweaksDeBloat.IsChecked = $false
         }
-        Write-Host "Doing Security checks for Administrator Account and Group Policy"
+        Write-Host "Bezig met veiligheidschecks voor administrator account en groepsbeleid"
         if(($(Get-WMIObject -class Win32_ComputerSystem | select username).username).IndexOf('Administrator') -eq -1){
             net user administrator /active:no
         }
     
         if(!(((Get-ComputerInfo).WindowsEditionId).IndexOf('Core') -eq -1) -or !(((Get-ComputerInfo).WindowsEditionId).IndexOf('Home') -eq -1)){ # Not sure if home edition is Core or Home
-            Write-Host "Enabling gpedit.msc...Group Policy for Home Users"
+            Write-Host "Aanzetten gpedit.msc...Groepsbeleid voor thuisgebruikers"
             Get-ChildItem @(
                 "$env:SystemDrive\Windows\servicing\Packages\Microsoft-Windows-GroupPolicy-ClientTools-Package*.mum",
                 "$env:SystemDrive\Windows\servicing\Packages\Microsoft-Windows-GroupPolicy-ClientExtensions-Package*.mum"
             ) | ForEach-Object { dism.exe /online /norestart /add-package:"$_" }
         }
         Write-Host "================================="
-        Write-Host "--     Tweaks are Finished    ---"
+        Write-Host "--    Tweaks zijn compleet!   ---"
         Write-Host "================================="
         
         $ButtonType = [System.Windows.MessageBoxButton]::OK
-        $MessageboxTitle = "Tweaks are Finished "
+        $MessageboxTitle = "Tweaks zijn compleet "
         $Messageboxbody = ("Done")
         $MessageIcon = [System.Windows.MessageBoxImage]::Information
 
@@ -1005,17 +1005,17 @@ $WPFtweaksbutton.Add_Click({
     })
 
 $WPFundoall.Add_Click({
-        Write-Host "Creating Restore Point in case something bad happens"
+        Write-Host "Creëren van restore point"
         Enable-ComputerRestore -Drive "$env:SystemDrive"
         Checkpoint-Computer -Description "RestorePoint1" -RestorePointType "MODIFY_SETTINGS"
 
-        Write-Host "Enabling Telemetry..."
+        Write-Host "Inschakelen telemetrie..."
         Set-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\DataCollection" -Name "AllowTelemetry" -Type DWord -Value 1
         Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\DataCollection" -Name "AllowTelemetry" -Type DWord -Value 1
-        Write-Host "Enabling Wi-Fi Sense"
+        Write-Host "Inschakelen Wi-Fi sense"
         Set-ItemProperty -Path "HKLM:\Software\Microsoft\PolicyManager\default\WiFi\AllowWiFiHotSpotReporting" -Name "Value" -Type DWord -Value 1
         Set-ItemProperty -Path "HKLM:\Software\Microsoft\PolicyManager\default\WiFi\AllowAutoConnectToWiFiSenseHotspots" -Name "Value" -Type DWord -Value 1
-        Write-Host "Enabling Application suggestions..."
+        Write-Host "Inschakelen applicatie suggesties..."
         Set-ItemProperty -Path "HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\ContentDeliveryManager" -Name "ContentDeliveryAllowed" -Type DWord -Value 1
         Set-ItemProperty -Path "HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\ContentDeliveryManager" -Name "OemPreInstalledAppsEnabled" -Type DWord -Value 1
         Set-ItemProperty -Path "HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\ContentDeliveryManager" -Name "PreInstalledAppsEnabled" -Type DWord -Value 1
@@ -1030,89 +1030,89 @@ $WPFundoall.Add_Click({
             Remove-Item -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\CloudContent" -Recurse -ErrorAction SilentlyContinue
         }
         Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\CloudContent" -Name "DisableWindowsConsumerFeatures" -Type DWord -Value 0
-        Write-Host "Enabling Activity History..."
+        Write-Host "Inschakelen activiteit geschiedenis..."
         Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\System" -Name "EnableActivityFeed" -Type DWord -Value 1
         Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\System" -Name "PublishUserActivities" -Type DWord -Value 1
         Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\System" -Name "UploadUserActivities" -Type DWord -Value 1
-        Write-Host "Enable Location Tracking..."
+        Write-Host "Inschakelen locatie tracking..."
         If (Test-Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\location") {
             Remove-Item -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\location" -Recurse -ErrorAction SilentlyContinue
         }
         Set-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\location" -Name "Value" -Type String -Value "Allow"
         Set-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Sensor\Overrides\{BFA794E4-F964-4FDB-90F6-51056BFE4B44}" -Name "SensorPermissionState" -Type DWord -Value 1
         Set-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Services\lfsvc\Service\Configuration" -Name "Status" -Type DWord -Value 1
-        Write-Host "Enabling automatic Maps updates..."
+        Write-Host "Inschakelen automatische map updates..."
         Set-ItemProperty -Path "HKLM:\SYSTEM\Maps" -Name "AutoUpdateEnabled" -Type DWord -Value 1
-        Write-Host "Enabling Feedback..."
+        Write-Host "Inschakelen feedback..."
         If (Test-Path "HKCU:\SOFTWARE\Microsoft\Siuf\Rules") {
             Remove-Item -Path "HKCU:\SOFTWARE\Microsoft\Siuf\Rules" -Recurse -ErrorAction SilentlyContinue
         }
         Set-ItemProperty -Path "HKCU:\SOFTWARE\Microsoft\Siuf\Rules" -Name "NumberOfSIUFInPeriod" -Type DWord -Value 0
         Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\DataCollection" -Name "DoNotShowFeedbackNotifications" -Type DWord -Value 0
-        Write-Host "Enabling Tailored Experiences..."
+        Write-Host "Inschakelen op maat gemaakte ervaringen..."
         If (Test-Path "HKCU:\SOFTWARE\Policies\Microsoft\Windows\CloudContent") {
             Remove-Item -Path "HKCU:\SOFTWARE\Policies\Microsoft\Windows\CloudContent" -Recurse -ErrorAction SilentlyContinue
         }
         Set-ItemProperty -Path "HKCU:\SOFTWARE\Policies\Microsoft\Windows\CloudContent" -Name "DisableTailoredExperiencesWithDiagnosticData" -Type DWord -Value 0
-        Write-Host "Disabling Advertising ID..."
+        Write-Host "Uitschakelen adverteerder ID..."
         If (Test-Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\AdvertisingInfo") {
             Remove-Item -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\AdvertisingInfo" -Recurse -ErrorAction SilentlyContinue
         }
         Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\AdvertisingInfo" -Name "DisabledByGroupPolicy" -Type DWord -Value 0
-        Write-Host "Allow Error reporting..."
+        Write-Host "Sta error reportages toe..."
         Set-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows\Windows Error Reporting" -Name "Disabled" -Type DWord -Value 0
-        Write-Host "Allowing Diagnostics Tracking Service..."
+        Write-Host "Toestaan diagnostische tracking service..."
         Stop-Service "DiagTrack" -WarningAction SilentlyContinue
         Set-Service "DiagTrack" -StartupType Manual
-        Write-Host "Allowing WAP Push Service..."
+        Write-Host "Toestaan WAP Push Service..."
         Stop-Service "dmwappushservice" -WarningAction SilentlyContinue
         Set-Service "dmwappushservice" -StartupType Manual
-        Write-Host "Allowing Home Groups services..."
+        Write-Host "Toestaan thuisgebruiker services..."
         Stop-Service "HomeGroupListener" -WarningAction SilentlyContinue
         Set-Service "HomeGroupListener" -StartupType Manual
         Stop-Service "HomeGroupProvider" -WarningAction SilentlyContinue
         Set-Service "HomeGroupProvider" -StartupType Manual
-        Write-Host "Enabling Storage Sense..."
+        Write-Host "Inschakelen opslagbeheer..."
         New-Item -Path "HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\StorageSense\Parameters\StoragePolicy" | Out-Null
-        Write-Host "Allowing Superfetch service..."
+        Write-Host "Toestaan superfetch service..."
         Stop-Service "SysMain" -WarningAction SilentlyContinue
         Set-Service "SysMain" -StartupType Manual
-        Write-Host "Setting BIOS time to Local Time instead of UTC..."
+        Write-Host "Instellen BIOS tijd naar locale tijd in plaats van UTC..."
         Set-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\TimeZoneInformation" -Name "RealTimeIsUniversal" -Type DWord -Value 0
-        Write-Host "Enabling Hibernation..."
+        Write-Host "Inschakelen hibernatie..."
         Set-ItemProperty -Path "HKLM:\System\CurrentControlSet\Control\Session Manager\Power" -Name "HibernteEnabled" -Type Dword -Value 1
         Set-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\FlyoutMenuSettings" -Name "ShowHibernateOption" -Type Dword -Value 1
         Remove-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Personalization" -Name "NoLockScreen" -ErrorAction SilentlyContinue
 
-        Write-Host "Hiding file operations details..."
+        Write-Host "Verbergen bestands operatie details..."
         If (Test-Path "HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\OperationStatusManager") {
             Remove-Item -Path "HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\OperationStatusManager" -Recurse -ErrorAction SilentlyContinue
         }
         Set-ItemProperty -Path "HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\OperationStatusManager" -Name "EnthusiastMode" -Type DWord -Value 0
-        Write-Host "Showing Task View button..."
+        Write-Host "Zie taak knop..."
         Set-ItemProperty -Path "HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced" -Name "ShowTaskViewButton" -Type DWord -Value 1
         Set-ItemProperty -Path "HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced\People" -Name "PeopleBand" -Type DWord -Value 1
 
-        Write-Host "Changing default Explorer view to Quick Access..."
+        Write-Host "Veranderen standaard explorer view tot snelle toegang..."
         Set-ItemProperty -Path "HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced" -Name "LaunchTo" -Type DWord -Value 1
 
-        Write-Host "Unrestricting AutoLogger directory"
+        Write-Host "Delimiteren AutoLogger bestandsmap"
         $autoLoggerDir = "$env:PROGRAMDATA\Microsoft\Diagnosis\ETLLogs\AutoLogger"
         icacls $autoLoggerDir /grant:r SYSTEM:`(OI`)`(CI`)F | Out-Null
 
-        Write-Host "Enabling and starting Diagnostics Tracking Service"
+        Write-Host "Inschakelen en opstarten van diagnostische tracking service"
         Set-Service "DiagTrack" -StartupType Automatic
         Start-Service "DiagTrack"
 
-        Write-Host "Hiding known file extensions"
+        Write-Host "Verberen van bekende bestands extensies"
         Set-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" -Name "HideFileExt" -Type DWord -Value 1
 
-        Write-Host "Reset Local Group Policies to Stock Defaults"
+        Write-Host "Resetten van het locale groepsbeleid tot standaard waardes"
         cmd /c RD /S /Q "%WinDir%\System32\GroupPolicyUsers"
         cmd /c RD /S /Q "%WinDir%\System32\GroupPolicy"
         cmd /c gpupdate /force
 
-        Write-Output "Adjusting visual effects for appearance..."
+        Write-Output "Veranderen van visuele effecten voor optimale snelheid..."
         Set-ItemProperty -Path "HKCU:\Control Panel\Desktop" -Name "DragFullWindows" -Type String -Value 1
         Set-ItemProperty -Path "HKCU:\Control Panel\Desktop" -Name "MenuShowDelay" -Type String -Value 400
         Set-ItemProperty -Path "HKCU:\Control Panel\Desktop" -Name "UserPreferencesMask" -Type Binary -Value ([byte[]](158, 30, 7, 128, 18, 0, 0, 0))
@@ -1124,16 +1124,16 @@ $WPFundoall.Add_Click({
         Set-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\VisualEffects" -Name "VisualFXSetting" -Type DWord -Value 3
         Set-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\DWM" -Name "EnableAeroPeek" -Type DWord -Value 1
 
-        Write-Host "Restoring Clipboard History..."
+        Write-Host "Herstellen clipboard geschiedenis"
         Remove-ItemProperty -Path "HKCU:\SOFTWARE\Microsoft\Clipboard" -Name "EnableClipboardHistory" -ErrorAction SilentlyContinue
         Remove-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\System" -Name "AllowClipboardHistory" -ErrorAction SilentlyContinue
-        Write-Host "Done - Reverted to Stock Settings"
+        Write-Host "Klaar - Herstelt tot standaard instellingen"
 
-        Write-Host "Essential Undo Completed"
+        Write-Host "Essentiele ongedaan maken compleet"
 
         $ButtonType = [System.Windows.MessageBoxButton]::OK
-        $MessageboxTitle = "Undo All"
-        $Messageboxbody = ("Done")
+        $MessageboxTitle = "Alles ongedaan maken"
+        $Messageboxbody = ("Klaar")
         $MessageIcon = [System.Windows.MessageBoxImage]::Information
 
         [System.Windows.MessageBox]::Show($Messageboxbody, $MessageboxTitle, $ButtonType, $MessageIcon)
@@ -1155,7 +1155,7 @@ $WPFFeatureInstall.Add_Click({
             Enable-WindowsOptionalFeature -Online -FeatureName "Microsoft-Hyper-V-Services" -All -NoRestart
             Enable-WindowsOptionalFeature -Online -FeatureName "Microsoft-Hyper-V-Management-Clients" -All -NoRestart
             cmd /c bcdedit /set hypervisorschedulertype classic
-            Write-Host "HyperV is now installed and configured. Please Reboot before using."
+            Write-Host "HyperV is nu geinstalleerd en geconfigureerd. Alstublieft herstarten voor gebruik."
         } 
         If ( $WPFFeatureslegacymedia.IsChecked -eq $true ) {
             Enable-WindowsOptionalFeature -Online -FeatureName "WindowsMediaPlayer" -All -NoRestart
@@ -1166,7 +1166,7 @@ $WPFFeatureInstall.Add_Click({
         If ( $WPFFeaturewsl.IsChecked -eq $true ) {
             Enable-WindowsOptionalFeature -Online -FeatureName "VirtualMachinePlatform" -All -NoRestart
             Enable-WindowsOptionalFeature -Online -FeatureName "Microsoft-Windows-Subsystem-Linux" -All -NoRestart
-            Write-Host "WSL is now installed and configured. Please Reboot before using."
+            Write-Host "WSL is nu geinstalleerd en geconfigureerd. Alstubleift herstarten voor gebruik."
         }
         If ( $WPFFeaturenfs.IsChecked -eq $true ) {
             Enable-WindowsOptionalFeature -Online -FeatureName "ServicesForNFS-ClientOnly" -All -NoRestart
@@ -1177,10 +1177,10 @@ $WPFFeatureInstall.Add_Click({
             Set-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\ClientForNFS\CurrentVersion\Default" -Name "AnonymousGID" -Type DWord -Value 0
             nfsadmin client start
             nfsadmin client localhost config fileaccess=755 SecFlavors=+sys -krb5 -krb5i
-            Write-Host "NFS is now setup for user based NFS mounts"
+            Write-Host "NFS is nu ingesteld voor gebruiker gerelateerde NFS koppelingen"
         }
         $ButtonType = [System.Windows.MessageBoxButton]::OK
-        $MessageboxTitle = "All features are now installed "
+        $MessageboxTitle = "Alle features zijn nu geinstalleerd"
         $Messageboxbody = ("Done")
         $MessageIcon = [System.Windows.MessageBoxImage]::Information
 
@@ -1264,26 +1264,26 @@ $WPFUpdatesdefault.Add_Click({
 
         foreach ($service in $services) {
 
-            Write-Host "Setting $service StartupType to Automatic"
+            Write-Host "Instellingen $service opstarttype naar automatisch"
             Get-Service -Name $service -ErrorAction SilentlyContinue | Set-Service -StartupType Automatic
         }
-        Write-Host "Enabling driver offering through Windows Update..."
+        Write-Host "Inschakelen installeren van drivers door middel van Windows Update..."
         Remove-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Device Metadata" -Name "PreventDeviceMetadataFromNetwork" -ErrorAction SilentlyContinue
         Remove-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\DriverSearching" -Name "DontPromptForWindowsUpdate" -ErrorAction SilentlyContinue
         Remove-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\DriverSearching" -Name "DontSearchWindowsUpdate" -ErrorAction SilentlyContinue
         Remove-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\DriverSearching" -Name "DriverUpdateWizardWuSearchEnabled" -ErrorAction SilentlyContinue
         Remove-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate" -Name "ExcludeWUDriversInQualityUpdate" -ErrorAction SilentlyContinue
-        Write-Host "Enabling Windows Update automatic restart..."
+        Write-Host "Inschakelen Windows Update automatisch opnieuw opstarten..."
         Remove-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate\AU" -Name "NoAutoRebootWithLoggedOnUsers" -ErrorAction SilentlyContinue
         Remove-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate\AU" -Name "AUPowerManagement" -ErrorAction SilentlyContinue
-        Write-Host "Enabled driver offering through Windows Update"
+        Write-Host "Inschakelen installeren van drivers door middel van Windows Update"
         Remove-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\WindowsUpdate\UX\Settings" -Name "BranchReadinessLevel" -ErrorAction SilentlyContinue
         Remove-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\WindowsUpdate\UX\Settings" -Name "DeferFeatureUpdatesPeriodInDays" -ErrorAction SilentlyContinue
         Remove-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\WindowsUpdate\UX\Settings" -Name "DeferQualityUpdatesPeriodInDays " -ErrorAction SilentlyContinue
     })
 
 $WPFFixesUpdate.Add_Click({
-        Write-Host "1. Stopping Windows Update Services..." 
+        Write-Host "1. Uitzetten Windows Update Services..." 
         Stop-Service -Name BITS 
         Stop-Service -Name wuauserv 
         Stop-Service -Name appidsvc 
@@ -1291,23 +1291,23 @@ $WPFFixesUpdate.Add_Click({
 
 
     
-        Write-Host "2. Remove QMGR Data file..." 
+        Write-Host "2. Weghalen van QMGR bestand..." 
         Remove-Item "$env:allusersprofile\Application Data\Microsoft\Network\Downloader\qmgr*.dat" -ErrorAction SilentlyContinue 
     
-        Write-Host "3. Renaming the Software Distribution and CatRoot Folder..." 
+        Write-Host "3. Hernamen van software distributie en CatRoot map..." 
         Rename-Item $env:systemroot\SoftwareDistribution SoftwareDistribution.bak -ErrorAction SilentlyContinue 
         Rename-Item $env:systemroot\System32\Catroot2 catroot2.bak -ErrorAction SilentlyContinue 
     
-        Write-Host "4. Removing old Windows Update log..." 
+        Write-Host "4. Verwijderen van oude Windows Update logs..." 
         Remove-Item $env:systemroot\WindowsUpdate.log -ErrorAction SilentlyContinue 
     
-        Write-Host "5. Resetting the Windows Update Services to defualt settings..." 
+        Write-Host "5. Resetten van Windows Update services tot standaard instellingen..." 
         "sc.exe sdset bits D:(A;;CCLCSWRPWPDTLOCRRC;;;SY)(A;;CCDCLCSWRPWPDTLOCRSDRCWDWO;;;BA)(A;;CCLCSWLOCRRC;;;AU)(A;;CCLCSWRPWPDTLOCRRC;;;PU)" 
         "sc.exe sdset wuauserv D:(A;;CCLCSWRPWPDTLOCRRC;;;SY)(A;;CCDCLCSWRPWPDTLOCRSDRCWDWO;;;BA)(A;;CCLCSWLOCRRC;;;AU)(A;;CCLCSWRPWPDTLOCRRC;;;PU)" 
     
         Set-Location $env:systemroot\system32 
     
-        Write-Host "6. Registering some DLLs..." 
+        Write-Host "6. Regristreren van DLLs..." 
         regsvr32.exe /s atl.dll 
         regsvr32.exe /s urlmon.dll 
         regsvr32.exe /s mshtml.dll 
@@ -1345,19 +1345,19 @@ $WPFFixesUpdate.Add_Click({
         regsvr32.exe /s muweb.dll 
         regsvr32.exe /s wuwebv.dll 
     
-        Write-Host "7) Removing WSUS client settings..." 
+        Write-Host "7) Verwijderen WSUS client instellingen..." 
         REG DELETE "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\WindowsUpdate" /v AccountDomainSid /f 
         REG DELETE "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\WindowsUpdate" /v PingID /f 
         REG DELETE "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\WindowsUpdate" /v SusClientId /f 
     
-        Write-Host "8) Resetting the WinSock..." 
+        Write-Host "8) Resetten WinSock..." 
         netsh winsock reset 
         netsh winhttp reset proxy 
     
-        Write-Host "9) Delete all BITS jobs..." 
+        Write-Host "9) Verwijder alle BITS jobs..." 
         Get-BitsTransfer | Remove-BitsTransfer 
     
-        Write-Host "10) Attempting to install the Windows Update Agent..." 
+        Write-Host "10) Proberen de Windows Update Agent te installeren..." 
         If (!((wmic OS get OSArchitecture | Out-String).IndexOf("64") -eq -1)) { 
             wusa Windows8-RT-KB2937636-x64 /quiet 
         }
@@ -1365,16 +1365,16 @@ $WPFFixesUpdate.Add_Click({
             wusa Windows8-RT-KB2937636-x86 /quiet 
         } 
     
-        Write-Host "11) Starting Windows Update Services..." 
+        Write-Host "11) Starten van Windows Update services..." 
         Start-Service -Name BITS 
         Start-Service -Name wuauserv 
         Start-Service -Name appidsvc 
         Start-Service -Name cryptsvc 
     
-        Write-Host "12) Forcing discovery..." 
+        Write-Host "12) Forceren van detectie..." 
         wuauclt /resetauthorization /detectnow 
     
-        Write-Host "Process complete. Please reboot your computer."
+        Write-Host "Process voltooid. Herstart nu je PC."
 
         $ButtonType = [System.Windows.MessageBoxButton]::OK
         $MessageboxTitle = "Reset Windows Update "
@@ -1434,13 +1434,13 @@ $WPFUpdatesdisable.Add_Click({
 
         foreach ($service in $services) {
 
-            Write-Host "Setting $service StartupType to Disabled"
+            Write-Host "Instellen $service startup type tot uitgeschakeld"
             Get-Service -Name $service -ErrorAction SilentlyContinue | Set-Service -StartupType Disabled
         }
 
     })
 $WPFUpdatessecurity.Add_Click({
-        Write-Host "Disabling driver offering through Windows Update..."
+        Write-Host "Uitschakelen van automatische driver installaties door middel van Windows Update..."
         If (!(Test-Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Device Metadata")) {
             New-Item -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Device Metadata" -Force | Out-Null
         }
@@ -1455,13 +1455,13 @@ $WPFUpdatessecurity.Add_Click({
             New-Item -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate" | Out-Null
         }
         Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate" -Name "ExcludeWUDriversInQualityUpdate" -Type DWord -Value 1
-        Write-Host "Disabling Windows Update automatic restart..."
+        Write-Host "Uitschakelen Windows Update automatische opnieuw opstarten..."
         If (!(Test-Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate\AU")) {
             New-Item -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate\AU" -Force | Out-Null
         }
         Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate\AU" -Name "NoAutoRebootWithLoggedOnUsers" -Type DWord -Value 1
         Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate\AU" -Name "AUPowerManagement" -Type DWord -Value 0
-        Write-Host "Disabled driver offering through Windows Update"
+        Write-Host "Uitschakelen van automatische driver installaties door middel van Windows Update compleet"
         Set-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\WindowsUpdate\UX\Settings" -Name "BranchReadinessLevel" -Type DWord -Value 20
         Set-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\WindowsUpdate\UX\Settings" -Name "DeferFeatureUpdatesPeriodInDays" -Type DWord -Value 365
         Set-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\WindowsUpdate\UX\Settings" -Name "DeferQualityUpdatesPeriodInDays " -Type DWord -Value 4

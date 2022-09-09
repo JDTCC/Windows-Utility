@@ -1,17 +1,8 @@
-<#
-.NOTES
-   Author      : Chris Titus 
-   GitHub      : https://github.com/ChrisTitusTech 
-    Version 1.0.0
-#>
-
-# $inputXML = Get-Content "MainWindow.xaml" #uncomment for development
-$inputXML = (new-object Net.WebClient).DownloadString("https://raw.githubusercontent.com/JTCJTCC/Windows-Utility/main/main_view") #uncomment for Production
+$inputXML = (new-object Net.WebClient).DownloadString("https://raw.githubusercontent.com/JTCJTCC/Windows-Utility/main/main_view") 
 
 $inputXML = $inputXML -replace 'mc:Ignorable="d"', '' -replace "x:N", 'N' -replace '^<Win.*', '<Window'
 [void][System.Reflection.Assembly]::LoadWithPartialName('presentationframework')
 [xml]$XAML = $inputXML
-#Read XAML
  
 $reader = (New-Object System.Xml.XmlNodeReader $xaml) 
 try { $Form = [Windows.Markup.XamlReader]::Load( $reader ) }
@@ -23,39 +14,19 @@ catch [System.Management.Automation.MethodInvocationException] {
     }
 }
 catch {
-    # If it broke some other way <img draggable="false" role="img" class="emoji" alt="😀" src="https://s0.wp.com/wp-content/mu-plugins/wpcom-smileys/twemoji/2/svg/1f600.svg">
     Write-Host "Unable to load Windows.Markup.XamlReader. Double-check syntax and ensure .net is installed."
 }
- 
-#===========================================================================
-# Store Form Objects In PowerShell
-#===========================================================================
- 
 $xaml.SelectNodes("//*[@Name]") | % { Set-Variable -Name "WPF$($_.Name)" -Value $Form.FindName($_.Name) }
  
 Function Get-FormVariables {
     If ($global:ReadmeDisplay -ne $true) { Write-host "If you need to reference this display again, run Get-FormVariables" -ForegroundColor Yellow; $global:ReadmeDisplay = $true }
     
     write-host "=====Windows Utility XL====="
-                           
- 
-    #====DEBUG GUI Elements====
-
-    #write-host "Found the following interactable elements from our form" -ForegroundColor Cyan
-    #get-variable WPF*
 }
  
 Get-FormVariables
 
-#===========================================================================
-# Global Variables
-#===========================================================================
 $AppTitle = "Windows Utility XL"
-
-
-#===========================================================================
-# Navigation Controls
-#===========================================================================
 
 $WPFTab1BT.Add_Click({
         $WPFTabNav.Items[0].IsSelected = $true
@@ -82,9 +53,6 @@ $WPFTab4BT.Add_Click({
         $WPFTabNav.Items[3].IsSelected = $true
     })
 
-#===========================================================================
-# Tab 1 - Install
-#===========================================================================
 $WPFinstall.Add_Click({
         $wingetinstall = New-Object System.Collections.Generic.List[System.Object]
         If ( $WPFInstalladobe.IsChecked -eq $true ) { 
@@ -391,64 +359,51 @@ $WPFinstall.Add_Click({
             $WPFInstallzoom.IsChecked = $false
         }    
 
-        # Check if winget is installed
-        Write-Host "Checking if Winget is Installed..."
+        Write-Host "Kijken of winget al is geinstalleerd..."
         if (Test-Path ~\AppData\Local\Microsoft\WindowsApps\winget.exe) {
-            #Checks if winget executable exists and if the Windows Version is 1809 or higher
-            Write-Host "Winget Already Installed"
+            Write-Host "Gelukkig is winget al geinstalleerd"
         }
         else {
             if (((((Get-ComputerInfo).OSName.IndexOf("LTSC")) -ne -1) -or ((Get-ComputerInfo).OSName.IndexOf("Server") -ne -1)) -and (((Get-ComputerInfo).WindowsVersion) -ge "1809")) {
-                #Checks if Windows edition is LTSC/Server 2019+
-                #Manually Installing Winget
-                Write-Host "Running Alternative Installer for LTSC/Server Editions"
-
-                #Download Needed Files
-                Write-Host "Downloading Needed Files..."
+                Write-Host "Starten alternatieve installeerder voor LTSC/Server Edities "
+                Write-Host "Downloaden van de benodigde bestanden..."
                 Start-BitsTransfer -Source "https://aka.ms/Microsoft.VCLibs.x64.14.00.Desktop.appx" -Destination "./Microsoft.VCLibs.x64.14.00.Desktop.appx"
                 Start-BitsTransfer -Source "https://github.com/microsoft/winget-cli/releases/download/v1.2.10271/Microsoft.DesktopAppInstaller_8wekyb3d8bbwe.msixbundle" -Destination "./Microsoft.DesktopAppInstaller_8wekyb3d8bbwe.msixbundle"
                 Start-BitsTransfer -Source "https://github.com/microsoft/winget-cli/releases/download/v1.2.10271/b0a0692da1034339b76dce1c298a1e42_License1.xml" -Destination "./b0a0692da1034339b76dce1c298a1e42_License1.xml"
 
-                #Installing Packages
-                Write-Host "Installing Packages..."
+                Write-Host "Bezig met installeren..."
                 Add-AppxProvisionedPackage -Online -PackagePath ".\Microsoft.VCLibs.x64.14.00.Desktop.appx" -SkipLicense
                 Add-AppxProvisionedPackage -Online -PackagePath ".\Microsoft.DesktopAppInstaller_8wekyb3d8bbwe.msixbundle" -LicensePath ".\b0a0692da1034339b76dce1c298a1e42_License1.xml"
-                Write-Host "winget Installed (Reboot might be required before winget will work)"
+                Write-Host "winget geinstalleerd (Restarten kan vereist zijn om winget te laten werken)"
 
-                #Sleep for 5 seconds to maximize chance that winget will work without reboot
-                Write-Host "Pausing for 5 seconds to maximize chance that winget will work without reboot"
-                Start-Sleep -s 5
+                Write-Host "Wachtend voor 10 seconden om de kanzen te maximalizeren dat winget werkt zonder te hoeven restarten"
+                Start-Sleep -s 10
 
-                #Removing no longer needed Files
-                Write-Host "Removing no longer needed Files..."
+                Write-Host "Verwijderen van onnodige bestanden..."
                 Remove-Item -Path ".\Microsoft.VCLibs.x64.14.00.Desktop.appx" -Force
                 Remove-Item -Path ".\Microsoft.DesktopAppInstaller_8wekyb3d8bbwe.msixbundle" -Force
                 Remove-Item -Path ".\b0a0692da1034339b76dce1c298a1e42_License1.xml" -Force
-                Write-Host "Removed Files that are no longer needed"
+                Write-Host "Verwijderen van onnodige bestanden"
             }
             elseif (((Get-ComputerInfo).WindowsVersion) -lt "1809") {
-                #Checks if Windows Version is too old for winget
-                Write-Host "Winget is not supported on this version of Windows (Pre-1809)"
+                Write-Host "winget is niet compatibel met deze versie van Windows. (Pre-1809)"
             }
             else {
-                #Installing Winget from the Microsoft Store
-                Write-Host "Winget not found, installing it now."
+                Write-Host "winget is niet gevonden, bezig met installeren."
                 Start-Process "ms-appinstaller:?source=https://aka.ms/getwinget"
                 $nid = (Get-Process AppInstaller).Id
                 Wait-Process -Id $nid
-                Write-Host "Winget Installed"
+                Write-Host "winget geinstalleerd"
             }
         }
 
         if ($wingetinstall.Count -eq 0) {
-            $WarningMsg = "Please select the program(s) to install"
+            $WarningMsg = "Selecteer de gewenste programma's om te installeren"
             [System.Windows.MessageBox]::Show($WarningMsg, $AppTitle, [System.Windows.MessageBoxButton]::OK, [System.Windows.MessageBoxImage]::Warning)
             return
         }
 
-        # Install all winget programs in new window
         $wingetinstall.ToArray()
-        # Define Output variable
         $wingetResult = New-Object System.Collections.Generic.List[System.Object]
         foreach ( $node in $wingetinstall ) {
             try {
@@ -456,7 +411,7 @@ $WPFinstall.Add_Click({
                 $wingetResult.Add("$node`n")
             }
             catch [System.InvalidOperationException] {
-                Write-Warning "Allow Yes on User Access Control to Install"
+                Write-Warning "Selecteer 'Ja' op de prompts om te installeren"
             }
             catch {
                 Write-Error $_.Exception
@@ -464,14 +419,13 @@ $WPFinstall.Add_Click({
         }
         $wingetResult.ToArray()
         $wingetResult | % { $_ } | Out-Host
-
-        # Popup after finished
         $ButtonType = [System.Windows.MessageBoxButton]::OK
+
         if ($wingetResult -ne "") {
-            $Messageboxbody = "Installed Programs `n$($wingetResult)"
+            $Messageboxbody = "Geinstalleerde programma's `n$($wingetResult)"
         }
         else {
-            $Messageboxbody = "No Program(s) are installed"
+            $Messageboxbody = "Geen geinstaleerde programma's gevonden"
         }
         $MessageIcon = [System.Windows.MessageBoxImage]::Information
 
@@ -486,21 +440,18 @@ $WPFInstallUpgrade.Add_Click({
             $isUpgradeSuccess = $true
         }
         catch [System.InvalidOperationException] {
-            Write-Warning "Allow Yes on User Access Control to Upgrade"
+            Write-Warning "Selecteer 'Ja' op de prompts om te installeren"
         }
         catch {
             Write-Error $_.Exception
         }
         $ButtonType = [System.Windows.MessageBoxButton]::OK
-        $Messageboxbody = if($isUpgradeSuccess) {"Upgrade Done"} else {"Upgrade was not succesful"}
+        $Messageboxbody = if($isUpgradeSuccess) {"Upgrade compleet"} else {"Upgrade was niet succesvol, probeer opnieuw"}
         $MessageIcon = [System.Windows.MessageBoxImage]::Information
 
         [System.Windows.MessageBox]::Show($Messageboxbody, $AppTitle, $ButtonType, $MessageIcon)
     })
 
-#===========================================================================
-# Tab 2 - Tweak Buttons
-#===========================================================================
 $WPFdesktop.Add_Click({
 
         $WPFEssTweaksAH.IsChecked = $true
@@ -564,7 +515,7 @@ $WPFminimal.Add_Click({
 $WPFtweaksbutton.Add_Click({
 
         If ( $WPFEssTweaksAH.IsChecked -eq $true ) {
-            Write-Host "Disabling Activity History..."
+            Write-Host "Uitschakelen activiteit geschiedenis..."
             Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\System" -Name "EnableActivityFeed" -Type DWord -Value 0
             Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\System" -Name "PublishUserActivities" -Type DWord -Value 0
             Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\System" -Name "UploadUserActivities" -Type DWord -Value 0
@@ -581,7 +532,7 @@ $WPFtweaksbutton.Add_Click({
             $WPFEssTweaksDVR.IsChecked = $false
         }
         If ( $WPFEssTweaksHiber.IsChecked -eq $true  ) {
-            Write-Host "Disabling Hibernation..."
+            Write-Host "Uitschakelen hibernatie..."
             Set-ItemProperty -Path "HKLM:\System\CurrentControlSet\Control\Session Manager\Power" -Name "HibernteEnabled" -Type Dword -Value 0
             If (!(Test-Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\FlyoutMenuSettings")) {
                 New-Item -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\FlyoutMenuSettings" | Out-Null
@@ -594,14 +545,14 @@ $WPFtweaksbutton.Add_Click({
             $WPFEssTweaksHome.IsChecked = $false
         }
         If ( $WPFEssTweaksLoc.IsChecked -eq $true ) {
-            Write-Host "Disabling Location Tracking..."
+            Write-Host "Uitschakelen locatie tracking..."
             If (!(Test-Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\location")) {
                 New-Item -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\location" -Force | Out-Null
             }
             Set-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\location" -Name "Value" -Type String -Value "Deny"
             Set-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Sensor\Overrides\{BFA794E4-F964-4FDB-90F6-51056BFE4B44}" -Name "SensorPermissionState" -Type DWord -Value 0
             Set-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Services\lfsvc\Service\Configuration" -Name "Status" -Type DWord -Value 0
-            Write-Host "Disabling automatic Maps updates..."
+            Write-Host "Uischakelen automatische map updates..."
             Set-ItemProperty -Path "HKLM:\SYSTEM\Maps" -Name "AutoUpdateEnabled" -Type DWord -Value 0
             $WPFEssTweaksLoc.IsChecked = $false
         }
@@ -613,7 +564,7 @@ $WPFtweaksbutton.Add_Click({
             $WPFEssTweaksOO.IsChecked = $false
         }
         If ( $WPFEssTweaksRP.IsChecked -eq $true ) {
-            Write-Host "Creating Restore Point in case something bad happens"
+            Write-Host "Bezig met het creëren van een Restore Point"
             Enable-ComputerRestore -Drive "$env:SystemDrive"
             Checkpoint-Computer -Description "RestorePoint1" -RestorePointType "MODIFY_SETTINGS"
             $WPFEssTweaksRP.IsChecked = $false
@@ -710,7 +661,6 @@ $WPFtweaksbutton.Add_Click({
             )
         
             foreach ($service in $services) {
-                # -ErrorAction SilentlyContinue is so it doesn't write an error to stdout if a service doesn't exist
         
                 Write-Host "Setting $service StartupType to Manual"
                 Get-Service -Name $service -ErrorAction SilentlyContinue | Set-Service -StartupType Manual
@@ -718,12 +668,12 @@ $WPFtweaksbutton.Add_Click({
             $WPFEssTweaksServices.IsChecked = $false
         }
         If ( $WPFEssTweaksStorage.IsChecked -eq $true ) {
-            Write-Host "Disabling Storage Sense..."
+            Write-Host "Uitschakelen opslagbeheer..."
             Remove-Item -Path "HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\StorageSense\Parameters\StoragePolicy" -Recurse -ErrorAction SilentlyContinue
             $WPFEssTweaksStorage.IsChecked = $false
         }
         If ( $WPFEssTweaksTele.IsChecked -eq $true ) {
-            Write-Host "Disabling Telemetry..."
+            Write-Host "Uitschakelen telemetrie..."
             Set-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\DataCollection" -Name "AllowTelemetry" -Type DWord -Value 0
             Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\DataCollection" -Name "AllowTelemetry" -Type DWord -Value 0
             Disable-ScheduledTask -TaskName "Microsoft\Windows\Application Experience\Microsoft Compatibility Appraiser" | Out-Null
@@ -732,7 +682,7 @@ $WPFtweaksbutton.Add_Click({
             Disable-ScheduledTask -TaskName "Microsoft\Windows\Customer Experience Improvement Program\Consolidator" | Out-Null
             Disable-ScheduledTask -TaskName "Microsoft\Windows\Customer Experience Improvement Program\UsbCeip" | Out-Null
             Disable-ScheduledTask -TaskName "Microsoft\Windows\DiskDiagnostic\Microsoft-Windows-DiskDiagnosticDataCollector" | Out-Null
-            Write-Host "Disabling Application suggestions..."
+            Write-Host "Uitschakelen applicatie suggesties..."
             Set-ItemProperty -Path "HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\ContentDeliveryManager" -Name "ContentDeliveryAllowed" -Type DWord -Value 0
             Set-ItemProperty -Path "HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\ContentDeliveryManager" -Name "OemPreInstalledAppsEnabled" -Type DWord -Value 0
             Set-ItemProperty -Path "HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\ContentDeliveryManager" -Name "PreInstalledAppsEnabled" -Type DWord -Value 0
@@ -747,7 +697,7 @@ $WPFtweaksbutton.Add_Click({
                 New-Item -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\CloudContent" -Force | Out-Null
             }
             Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\CloudContent" -Name "DisableWindowsConsumerFeatures" -Type DWord -Value 1
-            Write-Host "Disabling Feedback..."
+            Write-Host "Uitschakelen deedback..."
             If (!(Test-Path "HKCU:\SOFTWARE\Microsoft\Siuf\Rules")) {
                 New-Item -Path "HKCU:\SOFTWARE\Microsoft\Siuf\Rules" -Force | Out-Null
             }
@@ -755,41 +705,41 @@ $WPFtweaksbutton.Add_Click({
             Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\DataCollection" -Name "DoNotShowFeedbackNotifications" -Type DWord -Value 1
             Disable-ScheduledTask -TaskName "Microsoft\Windows\Feedback\Siuf\DmClient" -ErrorAction SilentlyContinue | Out-Null
             Disable-ScheduledTask -TaskName "Microsoft\Windows\Feedback\Siuf\DmClientOnScenarioDownload" -ErrorAction SilentlyContinue | Out-Null
-            Write-Host "Disabling Tailored Experiences..."
+            Write-Host "Uitschakelen op maat gemaakte ervaringen..."
             If (!(Test-Path "HKCU:\SOFTWARE\Policies\Microsoft\Windows\CloudContent")) {
                 New-Item -Path "HKCU:\SOFTWARE\Policies\Microsoft\Windows\CloudContent" -Force | Out-Null
             }
             Set-ItemProperty -Path "HKCU:\SOFTWARE\Policies\Microsoft\Windows\CloudContent" -Name "DisableTailoredExperiencesWithDiagnosticData" -Type DWord -Value 1
-            Write-Host "Disabling Advertising ID..."
+            Write-Host "Uitschakelen adverteerders ID..."
             If (!(Test-Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\AdvertisingInfo")) {
                 New-Item -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\AdvertisingInfo" | Out-Null
             }
             Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\AdvertisingInfo" -Name "DisabledByGroupPolicy" -Type DWord -Value 1
-            Write-Host "Disabling Error reporting..."
+            Write-Host "Uitschakelen error verslagen..."
             Set-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows\Windows Error Reporting" -Name "Disabled" -Type DWord -Value 1
             Disable-ScheduledTask -TaskName "Microsoft\Windows\Windows Error Reporting\QueueReporting" | Out-Null
-            Write-Host "Restricting Windows Update P2P only to local network..."
+            Write-Host "Limiteren Windows Update P2P tot het locale netwerk..."
             If (!(Test-Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\DeliveryOptimization\Config")) {
                 New-Item -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\DeliveryOptimization\Config" | Out-Null
             }
             Set-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\DeliveryOptimization\Config" -Name "DODownloadMode" -Type DWord -Value 1
-            Write-Host "Stopping and disabling Diagnostics Tracking Service..."
+            Write-Host "Uitzetten en uitschakelen van diagnotische tracking service..."
             Stop-Service "DiagTrack" -WarningAction SilentlyContinue
             Set-Service "DiagTrack" -StartupType Disabled
-            Write-Host "Stopping and disabling WAP Push Service..."
+            Write-Host "Uitzetten en uitschakelen van WAP push service..."
             Stop-Service "dmwappushservice" -WarningAction SilentlyContinue
             Set-Service "dmwappushservice" -StartupType Disabled
-            Write-Host "Enabling F8 boot menu options..."
+            Write-Host "Inschakelen van F8 boot menu opties..."
             bcdedit /set `{current`} bootmenupolicy Legacy | Out-Null
-            Write-Host "Disabling Remote Assistance..."
+            Write-Host "Uitschakelen afstand assitentie..."
             Set-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\Remote Assistance" -Name "fAllowToGetHelp" -Type DWord -Value 0
-            Write-Host "Stopping and disabling Superfetch service..."
+            Write-Host "Uitzetten en uitschakelen van superfetch service..."
             Stop-Service "SysMain" -WarningAction SilentlyContinue
             Set-Service "SysMain" -StartupType Disabled
 
             # Task Manager Details
             If ((get-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion" -Name CurrentBuild).CurrentBuild -lt 22557) {
-                Write-Host "Showing task manager details..."
+                Write-Host "Zie taakbeheer details..."
                 $taskmgr = Start-Process -WindowStyle Hidden -FilePath taskmgr.exe -PassThru
                 Do {
                     Start-Sleep -Milliseconds 100
@@ -799,28 +749,27 @@ $WPFtweaksbutton.Add_Click({
                 $preferences.Preferences[28] = 0
                 Set-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\TaskManager" -Name "Preferences" -Type Binary -Value $preferences.Preferences
             }
-            else { Write-Host "Task Manager patch not run in builds 22557+ due to bug" }
+            else { Write-Host "Taakbeheer patch wordt niet gebruikt in versies 22557+ vanwege een bug" }
 
-            Write-Host "Showing file operations details..."
+            Write-Host "Zie bestand operatie details..."
             If (!(Test-Path "HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\OperationStatusManager")) {
                 New-Item -Path "HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\OperationStatusManager" | Out-Null
             }
             Set-ItemProperty -Path "HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\OperationStatusManager" -Name "EnthusiastMode" -Type DWord -Value 1
-            Write-Host "Hiding Task View button..."
+            Write-Host "Verbergen taak knop..."
             Set-ItemProperty -Path "HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced" -Name "ShowTaskViewButton" -Type DWord -Value 0
-            Write-Host "Hiding People icon..."
+            Write-Host "Verbergen mensen icoon..."
             If (!(Test-Path "HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced\People")) {
                 New-Item -Path "HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced\People" | Out-Null
             }
             Set-ItemProperty -Path "HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced\People" -Name "PeopleBand" -Type DWord -Value 0
 
-            Write-Host "Changing default Explorer view to This PC..."
+            Write-Host "Veranderen van standaard explorer view naar deze PC..."
             Set-ItemProperty -Path "HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced" -Name "LaunchTo" -Type DWord -Value 1
     
-            Write-Host "Hiding 3D Objects icon from This PC..."
+            Write-Host "Verbergen 3D Objecten icoon van deze PC..."
             Remove-Item -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\MyComputer\NameSpace\{0DB7E03F-FC29-4DC6-9020-FF41B59E513A}" -Recurse -ErrorAction SilentlyContinue  
         
-            ## Performance Tweaks and More Telemetry
             Set-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\DriverSearching" -Name "SearchOrderConfig" -Type DWord -Value 0
             Set-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Multimedia\SystemProfile" -Name "SystemResponsiveness" -Type DWord -Value 10
             Set-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Multimedia\SystemProfile" -Name "NetworkThrottlingIndex" -Type DWord -Value 10
@@ -833,12 +782,8 @@ $WPFtweaksbutton.Add_Click({
             Set-ItemProperty -Path "HKCU:\Control Panel\Desktop" -Name "WaitToKillServiceTimeout" -Type DWord -Value 2000
             Set-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management" -Name "ClearPageFileAtShutdown" -Type DWord -Value 0
             Set-ItemProperty -Path "HKCU:\Control Panel\Mouse" -Name "MouseHoverTime" -Type DWord -Value 10
-
-
-            # Network Tweaks
             Set-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Services\LanmanServer\Parameters" -Name "IRPStackSize" -Type DWord -Value 20
 
-            # Group svchost.exe processes
             $ram = (Get-CimInstance -ClassName Win32_PhysicalMemory | Measure-Object -Property Capacity -Sum).Sum / 1kb
             Set-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control" -Name "SvcHostSplitThresholdInKB" -Type DWord -Value $ram -Force
 
@@ -847,10 +792,7 @@ $WPFtweaksbutton.Add_Click({
                 New-Item -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Windows Feeds" | Out-Null
             }
             Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Windows Feeds" -Name "EnableFeeds" -Type DWord -Value 0
-            # Remove "News and Interest" from taskbar
             Set-ItemProperty -Path  "HKCU:\Software\Microsoft\Windows\CurrentVersion\Feeds" -Name "ShellFeedsTaskbarViewMode" -Type DWord -Value 2
-
-            # remove "Meet Now" button from taskbar
 
             If (!(Test-Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Policies\Explorer")) {
                 New-Item -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Policies\Explorer" -Force | Out-Null
@@ -992,9 +934,6 @@ $WPFtweaksbutton.Add_Click({
                 #"Microsoft.YourPhone"
                 "Microsoft.Getstarted"
                 "Microsoft.MicrosoftOfficeHub"
-
-                #Sponsored Windows 10 AppX Apps
-                #Add sponsored/featured apps to remove in the "*AppName*" format
                 "*EclipseManager*"
                 "*ActiproSoftwareLLC*"
                 "*AdobeSystemsIncorporated.AdobePhotoshopExpress*"
@@ -1064,9 +1003,7 @@ $WPFtweaksbutton.Add_Click({
 
         [System.Windows.MessageBox]::Show($Messageboxbody, $MessageboxTitle, $ButtonType, $MessageIcon)
     })
-#===========================================================================
-# Undo All
-#===========================================================================
+
 $WPFundoall.Add_Click({
         Write-Host "Creating Restore Point in case something bad happens"
         Enable-ComputerRestore -Drive "$env:SystemDrive"
@@ -1171,11 +1108,9 @@ $WPFundoall.Add_Click({
         Set-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" -Name "HideFileExt" -Type DWord -Value 1
 
         Write-Host "Reset Local Group Policies to Stock Defaults"
-        # cmd /c secedit /configure /cfg %windir%\inf\defltbase.inf /db defltbase.sdb /verbose
         cmd /c RD /S /Q "%WinDir%\System32\GroupPolicyUsers"
         cmd /c RD /S /Q "%WinDir%\System32\GroupPolicy"
         cmd /c gpupdate /force
-        # Considered using Invoke-GPUpdate but requires module most people won't have installed
 
         Write-Output "Adjusting visual effects for appearance..."
         Set-ItemProperty -Path "HKCU:\Control Panel\Desktop" -Name "DragFullWindows" -Type String -Value 1
@@ -1203,9 +1138,7 @@ $WPFundoall.Add_Click({
 
         [System.Windows.MessageBox]::Show($Messageboxbody, $MessageboxTitle, $ButtonType, $MessageIcon)
     })
-#===========================================================================
-# Tab 3 - Config Buttons
-#===========================================================================
+
 $WPFFeatureInstall.Add_Click({
 
         If ( $WPFFeaturesdotnet.IsChecked -eq $true ) {
@@ -1280,20 +1213,12 @@ $WPFPanelsystem.Add_Click({
 $WPFPaneluser.Add_Click({
         cmd /c "control userpasswords2"
     })
-#===========================================================================
-# Tab 4 - Updates Buttons
-#===========================================================================
 
 $WPFUpdatesdefault.Add_Click({
-        # Source: https://github.com/rgl/windows-vagrant/blob/master/disable-windows-updates.ps1 reversed! 
         Set-StrictMode -Version Latest
         $ProgressPreference = 'SilentlyContinue'
         $ErrorActionPreference = 'Stop'
 
-        # disable automatic updates.
-        # XXX this does not seem to work anymore.
-        # see How to configure automatic updates by using Group Policy or registry settings
-        #     at https://support.microsoft.com/en-us/help/328010
         function New-Directory($path) {
             $p, $components = $path -split '[\\/]'
             $components | ForEach-Object {
@@ -1306,9 +1231,6 @@ $WPFUpdatesdefault.Add_Click({
         }
         $auPath = 'HKLM:\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate\AU'
         New-Directory $auPath 
-        # set NoAutoUpdate.
-        # 0: Automatic Updates is enabled (default).
-        # 1: Automatic Updates is disabled.
         New-ItemProperty `
             -Path $auPath `
             -Name NoAutoUpdate `
@@ -1316,11 +1238,6 @@ $WPFUpdatesdefault.Add_Click({
             -PropertyType DWORD `
             -Force `
         | Out-Null
-        # set AUOptions.
-        # 1: Keep my computer up to date has been disabled in Automatic Updates.
-        # 2: Notify of download and installation.
-        # 3: Automatically download and notify of installation.
-        # 4: Automatically download and scheduled installation.
         New-ItemProperty `
             -Path $auPath `
             -Name AUOptions `
@@ -1329,11 +1246,6 @@ $WPFUpdatesdefault.Add_Click({
             -Force `
         | Out-Null
 
-        # disable Windows Update Delivery Optimization.
-        # NB this applies to Windows 10.
-        # 0: Disabled
-        # 1: PCs on my local network
-        # 3: PCs on my local network, and PCs on the Internet
         $deliveryOptimizationPath = 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\DeliveryOptimization\Config'
         If (Test-Path $deliveryOptimizationPath) {
             New-ItemProperty `
@@ -1344,7 +1256,6 @@ $WPFUpdatesdefault.Add_Click({
                 -Force `
             | Out-Null
         }
-        # Service tweaks for Windows Update
 
         $services = @(
             "BITS"
@@ -1352,7 +1263,6 @@ $WPFUpdatesdefault.Add_Click({
         )
 
         foreach ($service in $services) {
-            # -ErrorAction SilentlyContinue is so it doesn't write an error to stdout if a service doesn't exist
 
             Write-Host "Setting $service StartupType to Automatic"
             Get-Service -Name $service -ErrorAction SilentlyContinue | Set-Service -StartupType Automatic
@@ -1373,7 +1283,6 @@ $WPFUpdatesdefault.Add_Click({
     })
 
 $WPFFixesUpdate.Add_Click({
-        ### Reset Windows Update Script - reregister dlls, services, and remove registry entires.
         Write-Host "1. Stopping Windows Update Services..." 
         Stop-Service -Name BITS 
         Stop-Service -Name wuauserv 
@@ -1475,15 +1384,10 @@ $WPFFixesUpdate.Add_Click({
         [System.Windows.MessageBox]::Show($Messageboxbody, $MessageboxTitle, $ButtonType, $MessageIcon)
     })
 $WPFUpdatesdisable.Add_Click({
-        # Source: https://github.com/rgl/windows-vagrant/blob/master/disable-windows-updates.ps1
         Set-StrictMode -Version Latest
         $ProgressPreference = 'SilentlyContinue'
         $ErrorActionPreference = 'Stop'
 
-        # disable automatic updates.
-        # XXX this does not seem to work anymore.
-        # see How to configure automatic updates by using Group Policy or registry settings
-        #     at https://support.microsoft.com/en-us/help/328010
         function New-Directory($path) {
             $p, $components = $path -split '[\\/]'
             $components | ForEach-Object {
@@ -1496,9 +1400,6 @@ $WPFUpdatesdisable.Add_Click({
         }
         $auPath = 'HKLM:\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate\AU'
         New-Directory $auPath 
-        # set NoAutoUpdate.
-        # 0: Automatic Updates is enabled (default).
-        # 1: Automatic Updates is disabled.
         New-ItemProperty `
             -Path $auPath `
             -Name NoAutoUpdate `
@@ -1506,11 +1407,7 @@ $WPFUpdatesdisable.Add_Click({
             -PropertyType DWORD `
             -Force `
         | Out-Null
-        # set AUOptions.
-        # 1: Keep my computer up to date has been disabled in Automatic Updates.
-        # 2: Notify of download and installation.
-        # 3: Automatically download and notify of installation.
-        # 4: Automatically download and scheduled installation.
+
         New-ItemProperty `
             -Path $auPath `
             -Name AUOptions `
@@ -1519,11 +1416,6 @@ $WPFUpdatesdisable.Add_Click({
             -Force `
         | Out-Null
 
-        # disable Windows Update Delivery Optimization.
-        # NB this applies to Windows 10.
-        # 0: Disabled
-        # 1: PCs on my local network
-        # 3: PCs on my local network, and PCs on the Internet
         $deliveryOptimizationPath = 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\DeliveryOptimization\Config'
         If (Test-Path $deliveryOptimizationPath) {
             New-ItemProperty `
@@ -1534,7 +1426,6 @@ $WPFUpdatesdisable.Add_Click({
                 -Force `
             | Out-Null
         }
-        # Service tweaks for Windows Update
 
         $services = @(
             "BITS"
@@ -1542,7 +1433,6 @@ $WPFUpdatesdisable.Add_Click({
         )
 
         foreach ($service in $services) {
-            # -ErrorAction SilentlyContinue is so it doesn't write an error to stdout if a service doesn't exist
 
             Write-Host "Setting $service StartupType to Disabled"
             Get-Service -Name $service -ErrorAction SilentlyContinue | Set-Service -StartupType Disabled
@@ -1584,7 +1474,4 @@ $WPFUpdatessecurity.Add_Click({
         [System.Windows.MessageBox]::Show($Messageboxbody, $MessageboxTitle, $ButtonType, $MessageIcon)
     })
 
-#===========================================================================
-# Shows the form
-#===========================================================================
 $Form.ShowDialog() | out-null

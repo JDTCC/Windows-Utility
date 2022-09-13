@@ -1176,7 +1176,7 @@ $WPFFeatureInstall.Add_Click({
             Enable-WindowsOptionalFeature -Online -FeatureName "Microsoft-Windows-Subsystem-Linux" -All -NoRestart
             Write-Host "WSL is nu geinstalleerd en geconfigureerd. Alstubleift herstarten voor gebruik."
         }
-        If ( $WPFFeaturenfs.IsChecked -eq $true ) {ox]::Show($Messageboxbody
+        If ( $WPFFeaturenfs.IsChecked -eq $true ) {ox]::Show($Messageboxbody)
             Enable-WindowsOptionalFeature -Online -FeatureName "ServicesForNFS-ClientOnly" -All -NoRestart
             Enable-WindowsOptionalFeature -Online -FeatureName "ClientForNFS-Infrastructure" -All -NoRestart
             Enable-WindowsOptionalFeature -Online -FeatureName "NFS-Administration" -All -NoRestart

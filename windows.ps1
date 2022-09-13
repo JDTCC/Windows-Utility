@@ -430,6 +430,10 @@ $WPFinstall.Add_Click({
         $MessageIcon = [System.Windows.MessageBoxImage]::Information
 
         [System.Windows.MessageBox]::Show($Messageboxbody, $AppTitle, $ButtonType, $MessageIcon)
+        
+        Write-Host "================================"
+        Write-Host "---Installaties zijn voltooid---"
+        Write-Host "================================"
 
     })
 
@@ -992,9 +996,9 @@ $WPFtweaksbutton.Add_Click({
                 "$env:SystemDrive\Windows\servicing\Packages\Microsoft-Windows-GroupPolicy-ClientExtensions-Package*.mum"
             ) | ForEach-Object { dism.exe /online /norestart /add-package:"$_" }
         }
-        Write-Host "================================="
-        Write-Host "--    Tweaks zijn compleet!   ---"
-        Write-Host "================================="
+        Write-Host "==========================="
+        Write-Host "---Tweaks zijn compleet!---"
+        Write-Host "==========================="
         
         $ButtonType = [System.Windows.MessageBoxButton]::OK
         $MessageboxTitle = "Tweaks zijn compleet "
@@ -1137,6 +1141,10 @@ $WPFundoall.Add_Click({
         $MessageIcon = [System.Windows.MessageBoxImage]::Information
 
         [System.Windows.MessageBox]::Show($Messageboxbody, $MessageboxTitle, $ButtonType, $MessageIcon)
+
+        Write-Host "============================="
+        Write-Host "---Ongedaan maken voltooid---"
+        Write-Host "============================="
     })
 
 $WPFFeatureInstall.Add_Click({
@@ -1168,7 +1176,7 @@ $WPFFeatureInstall.Add_Click({
             Enable-WindowsOptionalFeature -Online -FeatureName "Microsoft-Windows-Subsystem-Linux" -All -NoRestart
             Write-Host "WSL is nu geinstalleerd en geconfigureerd. Alstubleift herstarten voor gebruik."
         }
-        If ( $WPFFeaturenfs.IsChecked -eq $true ) {
+        If ( $WPFFeaturenfs.IsChecked -eq $true ) {ox]::Show($Messageboxbody)
             Enable-WindowsOptionalFeature -Online -FeatureName "ServicesForNFS-ClientOnly" -All -NoRestart
             Enable-WindowsOptionalFeature -Online -FeatureName "ClientForNFS-Infrastructure" -All -NoRestart
             Enable-WindowsOptionalFeature -Online -FeatureName "NFS-Administration" -All -NoRestart
@@ -1185,6 +1193,10 @@ $WPFFeatureInstall.Add_Click({
         $MessageIcon = [System.Windows.MessageBoxImage]::Information
 
         [System.Windows.MessageBox]::Show($Messageboxbody, $MessageboxTitle, $ButtonType, $MessageIcon)
+        
+        Write-Host "================================="
+        Write-Host "---Features zijn geinstalleerd---"
+        Write-Host "================================="
     })
 
 $WPFPanelDISM.Add_Click({
@@ -1265,7 +1277,7 @@ $WPFUpdatesdefault.Add_Click({
         foreach ($service in $services) {
 
             Write-Host "Instellingen $service opstarttype naar automatisch"
-            Get-Service -Name $service -ErrorAction SilentlyContinue | Set-Service -StartupType Automatic
+            Get-Service -Name $service -ErrorAction SilentlyContinue | Set-Service -StartupType AutomaticSOFTWARE
         }
         Write-Host "Inschakelen installeren van drivers door middel van Windows Update..."
         Remove-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Device Metadata" -Name "PreventDeviceMetadataFromNetwork" -ErrorAction SilentlyContinue
@@ -1280,6 +1292,9 @@ $WPFUpdatesdefault.Add_Click({
         Remove-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\WindowsUpdate\UX\Settings" -Name "BranchReadinessLevel" -ErrorAction SilentlyContinue
         Remove-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\WindowsUpdate\UX\Settings" -Name "DeferFeatureUpdatesPeriodInDays" -ErrorAction SilentlyContinue
         Remove-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\WindowsUpdate\UX\Settings" -Name "DeferQualityUpdatesPeriodInDays " -ErrorAction SilentlyContinue
+        Write-Host "======================"
+        Write-Host "---Updates herstelt---"
+        Write-Host "======================"
     })
 
 $WPFFixesUpdate.Add_Click({
@@ -1353,6 +1368,7 @@ $WPFFixesUpdate.Add_Click({
         Write-Host "8) Resetten WinSock..." 
         netsh winsock reset 
         netsh winhttp reset proxy 
+        netsh int ip reset
     
         Write-Host "9) Verwijder alle BITS jobs..." 
         Get-BitsTransfer | Remove-BitsTransfer 
@@ -1437,6 +1453,9 @@ $WPFUpdatesdisable.Add_Click({
             Write-Host "Instellen $service startup type tot uitgeschakeld"
             Get-Service -Name $service -ErrorAction SilentlyContinue | Set-Service -StartupType Disabled
         }
+        Write-Host "================================"
+        Write-Host "---Alle updates zijn uitgezet---"
+        Write-Host "================================"
 
     })
 $WPFUpdatessecurity.Add_Click({
@@ -1472,6 +1491,9 @@ $WPFUpdatessecurity.Add_Click({
         $MessageIcon = [System.Windows.MessageBoxImage]::Information
 
         [System.Windows.MessageBox]::Show($Messageboxbody, $MessageboxTitle, $ButtonType, $MessageIcon)
+        Write-Host "====================================="
+        Write-Host "---Updates ingesteld op aanbevolen---"
+        Write-Host "====================================="
     })
 
 $Form.ShowDialog() | out-null

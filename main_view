@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:Windows Utility XL"
         mc:Ignorable="d"
         Background="#1c91bd"
-        Title="Windows Utility XL" Height="533" Width="786">
+        Title="Windows Utility XL" Height="1080" Width="720">
 	<Viewbox>
 		<Grid Background="#1c91bd" ShowGridLines="False" Name="MainGrid">
 			<Grid.ColumnDefinitions>
@@ -143,13 +143,13 @@
 							<RowDefinition Height="6*"/>
 						</Grid.RowDefinitions>
 						<StackPanel Background="#1c91bd" Orientation="Horizontal" Grid.Row="0" HorizontalAlignment="Center" Grid.ColumnSpan="2">
-							<Label Content="Recommended Selections:" FontSize="17" VerticalAlignment="Center"/>
+							<Label Content="Aanbevolen selecties:" FontSize="17" VerticalAlignment="Center"/>
 							<Button Name="desktop" Content="Desktop" Margin="7"/>
 							<Button Name="laptop" Content="Laptop" Margin="7"/>
 							<Button Name="minimal" Content="Minimal" Margin="7"/>
 						</StackPanel>
 						<StackPanel Background="#1c91bd" SnapsToDevicePixels="True" Grid.Row="1" Grid.Column="0" Margin="10,5">
-							<Label FontSize="16" Content="Essential Tweaks"/>
+							<Label FontSize="16" Content="Essentiele Tweaks"/>
 							<CheckBox Name="EssTweaksRP" Content="Maak een Restore Point" Margin="5,0"/>
 							<CheckBox Name="EssTweaksOO" Content="Start O and O Shutup" Margin="5,0"/>
 							<CheckBox Name="EssTweaksTele" Content="Zet Telemetrie uit" Margin="5,0"/>
@@ -223,7 +223,7 @@
 							<Button Name="Updatesdefault" FontSize="16" Background="AliceBlue" Content="Default (Out of Box) Settings" Margin="20,0,20,10" Padding="10"/>
 						</StackPanel>
 						<StackPanel Background="#777777" SnapsToDevicePixels="True" Grid.Row="1" Margin="10,5">
-							<TextBlock Text="Deze optie is aanbevolen. Het zal feature updates met 2 jaar uitstellen en zal toch de veiligheidsupdates na vier dagen installeren." Margin="20,0,20,0" Padding="10" TextWrapping="WrapWithOverflow" MaxWidth="300"/>
+							<TextBlock Text="Deze optie is aanbevolen. Het zal feature updates met 2 jaar uitstellen en toch de veiligheidsupdates na vier dagen installeren." Margin="20,0,20,0" Padding="10" TextWrapping="WrapWithOverflow" MaxWidth="300"/>
 							<Button Name="Updatessecurity" FontSize="16" Background="AliceBlue" Content="Security (Recommended) Settings" Margin="20,0,20,10" Padding="10"/>
 						</StackPanel>
 						<StackPanel Background="#777777" SnapsToDevicePixels="True" Grid.Row="2" Margin="10,5">

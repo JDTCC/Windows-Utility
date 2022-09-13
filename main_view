@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:Windows Utility XL"
         mc:Ignorable="d"
         Background="#1c91bd"
-        Title="Windows Utility XL" Height="1080" Width="720">
+        Title="Windows Utility XL" Height="720" Width="1080">
 	<Viewbox>
 		<Grid Background="#1c91bd" ShowGridLines="False" Name="MainGrid">
 			<Grid.ColumnDefinitions>
